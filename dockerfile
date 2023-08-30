@@ -7,6 +7,6 @@ COPY pom.xml .
 COPY src ./src
 RUN mvn test clean package
 
-FROM adoptopenjdk:11-jre-hotspot
+FROM openjdk:11-jre-slim
 COPY --from=build /app/target/*.jar .
 CMD ["java", "-jar", "/app.jar"]
