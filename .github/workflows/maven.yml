@@ -30,6 +30,26 @@ jobs:
       -
         name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
+        
+    - 
+      name: Bump Patch Version
+      run: |
+        # Extract the current version from the pom.xml file
+        current_version=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+        
+        # Increment the Patch version (assuming your version format is X.Y.Z)
+        patch_version=$(echo $current_version | awk -F. '{print $3}')
+        ((patch_version++))
+        new_version=$(echo $current_version | awk -F. -v patch_version=$patch_version '{$3=patch_version; OFS="."; print}')
+        
+        # Update the pom.xml file with the new version
+        mvn versions:set -DnewVersion=$new_version
+
+        # Commit the version change
+        git commit -am "Bump Patch Version to $new_version"
+        git push
+  
+      
       -
         name: Build and push
         uses: docker/build-push-action@v4
