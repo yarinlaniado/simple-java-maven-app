@@ -34,3 +34,18 @@ jobs:
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/java_app:latest
 
+      - name: Deploy to AWS
+        run: |
+          # Write the SSH key from secrets to a file
+          echo "${{ secrets.DEPLOY_SSH_PRIVATE_KEY }}" > deploy_key
+          chmod 600 deploy_key
+
+          # Use SSH to deploy on your laptop
+          ssh -T -i deploy_key -o "StrictHostKeyChecking=no" ubuntu@ec2-15-237-127-144.eu-west-3.compute.amazonaws.com << EOF
+            docker pull yarinlaniado/java_app:latest
+            docker stop my-app-container || true
+            docker rm my-app-container || true
+            docker run -d --name my-app-container yarinlaniado/java_app:latest
+          EOF
+
+
